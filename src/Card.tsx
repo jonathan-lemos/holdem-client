@@ -1,4 +1,5 @@
 import React from "react";
+import {enumerate, range, toObject, zip} from "./Linq";
 
 export enum Rank {
     Two = "2",
@@ -16,6 +17,10 @@ export enum Rank {
     Ace = "A"
 }
 
+export const RankOrder = Object.freeze([Rank.Two, Rank.Three, Rank.Four, Rank.Five, Rank.Six, Rank.Seven, Rank.Eight, Rank.Nine, Rank.Ten, Rank.Jack, Rank.Queen, Rank.King, Rank.Ace]);
+
+export const RankToOrder: Readonly<{ [key: Rank]: number }> = Object.freeze(toObject(enumerate(RankOrder), elem => elem[1], elem => elem[0]))
+
 export enum Suit {
     Diamond = "♦",
     Club = "♠",
@@ -23,31 +28,51 @@ export enum Suit {
     Spade = "♠",
 }
 
+export const SuitOrder = Object.freeze([Suit.Diamond, Suit.Club, Suit.Heart, Suit.Spade]);
+
+export const SuitToOrder: Readonly<{ [key: Suit]: number }> = Object.freeze(toObject(enumerate(SuitOrder), elem => elem[1], elem => elem[0]))
+
+export enum HandType {
+    StraightFlush,
+    Quads,
+    Boat,
+    Flush,
+    Straight,
+    Set,
+    TwoPair,
+    Pair,
+    HighCard
+}
+
 export interface CardProps {
     rank: Rank,
     suit: Suit
 }
 
-export default class Card extends React.Component<CardProps> {
-    private readonly id: string;
-
-    public constructor(props: CardProps) {
-        super(props);
-        this.id = props.rank + "-" + props.suit;
+module CardUtils {
+    const sort = (cards: CardProps[]): CardProps[]
+    {
+        const ret = [...cards];
+        ret.sort((a, b) => {
+            if (a.rank !== b.rank) {
+                return a.rank
+            }
+        })
     }
 
-    public get rank() {
-        return this.props.rank;
+    const bestFive = (cards: CardProps[]) => {
+
     }
 
-    public get suit() {
-        return this.props.suit;
-    }
+    export function compare(
+        community: [CardProps, CardProps, CardProps, CardProps, CardProps],
+        ...hands: [CardProps, CardProps][]): [number, [CardProps, CardProps, CardProps, CardProps, CardProps]] {
 
-    public render() {
-        return (<div className="border w-100 h-100">
-            {this.props.rank}-{this.props.suit}
-            </div>)
     }
+}
 
+export default function Card({rank, suit}: CardProps) {
+    return (<div className="border w-100 h-100">
+        {rank}-{suit}
+    </div>)
 }

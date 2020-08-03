@@ -16,7 +16,6 @@ export interface TableState {
 
 export class Table extends React.Component<TableProps, TableState> {
     public render() {
-        const ratio = Math.floor(3 * window.screen.availWidth / window.screen.availHeight);
         let sideCount = Math.ceil(this.state.players.length * window.screen.availHeight / (window.screen.availWidth + window.screen.availHeight) / 4);
         let topCount = this.state.players.length - (sideCount * 2);
         if (topCount <= 0) {
@@ -37,6 +36,8 @@ export class Table extends React.Component<TableProps, TableState> {
         for (let i = sideCount + topCount; i < this.state.players.length; ++i) {
             rightList.push(this.state.players[i]);
         }
+
+        x = <Player props={}
 
         return (<div className="w-100 d-flex flex-column">
             {/* players on top */}
