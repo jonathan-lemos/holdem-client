@@ -1,5 +1,6 @@
 import React from "react";
-import {enumerate, range, toObject, zip} from "./Linq";
+import {any, enumerate, first, groupBy, range, toObject, zip} from "./Linq";
+import {deepEqual} from "./Misc";
 
 export enum Rank {
     Two = "2",
@@ -19,7 +20,7 @@ export enum Rank {
 
 export const RankOrder = Object.freeze([Rank.Two, Rank.Three, Rank.Four, Rank.Five, Rank.Six, Rank.Seven, Rank.Eight, Rank.Nine, Rank.Ten, Rank.Jack, Rank.Queen, Rank.King, Rank.Ace]);
 
-export const RankToOrder: Readonly<{ [key: Rank]: number }> = Object.freeze(toObject(enumerate(RankOrder), elem => elem[1], elem => elem[0]))
+export const RankToOrder = Object.freeze(toObject(enumerate(RankOrder), elem => elem[1], elem => elem[0]))
 
 export enum Suit {
     Diamond = "♦",
@@ -30,9 +31,9 @@ export enum Suit {
 
 export const SuitOrder = Object.freeze([Suit.Diamond, Suit.Club, Suit.Heart, Suit.Spade]);
 
-export const SuitToOrder: Readonly<{ [key: Suit]: number }> = Object.freeze(toObject(enumerate(SuitOrder), elem => elem[1], elem => elem[0]))
+export const SuitToOrder = Object.freeze(toObject(enumerate(SuitOrder), elem => elem[1], elem => elem[0]))
 
-export enum HandType {
+export enum HandRank {
     StraightFlush,
     Quads,
     Boat,
@@ -47,28 +48,6 @@ export enum HandType {
 export interface CardProps {
     rank: Rank,
     suit: Suit
-}
-
-module CardUtils {
-    const sort = (cards: CardProps[]): CardProps[]
-    {
-        const ret = [...cards];
-        ret.sort((a, b) => {
-            if (a.rank !== b.rank) {
-                return a.rank
-            }
-        })
-    }
-
-    const bestFive = (cards: CardProps[]) => {
-
-    }
-
-    export function compare(
-        community: [CardProps, CardProps, CardProps, CardProps, CardProps],
-        ...hands: [CardProps, CardProps][]): [number, [CardProps, CardProps, CardProps, CardProps, CardProps]] {
-
-    }
 }
 
 export default function Card({rank, suit}: CardProps) {
