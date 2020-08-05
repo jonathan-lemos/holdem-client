@@ -1,5 +1,5 @@
-import {CardProps, HandRank, Rank, Suit} from "../Card";
-import {bestFive, handSort} from "../CardUtils";
+import {HandRank, Rank, Suit} from "../Card";
+import {bestFive} from "../CardUtils";
 
 // const c = (rank: Rank, suit: Suit) => ({rank, suit});
 
@@ -58,27 +58,84 @@ const c = {
     "AS": {"rank": Rank.Ace, "suit": Suit.Spade}
 };
 
-const s = (s: CardProps[]) => handSort(s);
-
-const ss = (p: [HandRank, CardProps[]]) => {
-    const sss = s(p[1]);
-    return [p[0], sss];
-}
 
 test('bestFive detects straight flush', () => {
     const hand = [c.TS, c.JS];
     const community = [c["2S"], c.QH, c.QS, c.AS, c.KS];
-    const expected: [HandRank, CardProps[]] = [HandRank.StraightFlush, [c.TS, c.JS, c.QS, c.KS, c.AS]];
-    const actual: [HandRank, CardProps[]] = bestFive(hand.concat(community));
+    const expected = {rank: HandRank.StraightFlush, hand: [c.AS, c.KS, c.QS, c.JS, c.TS]};
+    const actual = bestFive(hand.concat(community));
 
-    expect(ss(expected)).toEqual(ss(actual));
+    expect(expected).toEqual(actual);
 });
 
 test('bestFive detects quads', () => {
     const hand = [c.TS, c.TH];
     const community = [c.TC, c.JS, c.TD, c.QS, c.KS];
-    const expected: [HandRank, CardProps[]] = [HandRank.Quads, [c.TS, c.TH, c.TD, c.TC, c.KS]];
-    const actual: [HandRank, CardProps[]] = bestFive(hand.concat(community));
+    const expected = {rank: HandRank.Quads, hand: [c.TS, c.TH, c.TC, c.TD, c.KS]};
+    const actual = bestFive(hand.concat(community));
 
-    expect(ss(expected)).toEqual(ss(actual));
+    expect(expected).toEqual(actual);
+});
+
+test('bestFive detects boats', () => {
+    const hand = [c.TS, c.TH];
+    const community = [c.TC, c.AS, c.AH, c.AD, c.KS];
+    const expected = {rank: HandRank.Boat, hand: [c.AS, c.AH, c.AD, c.TS, c.TH]};
+    const actual = bestFive(hand.concat(community));
+
+    expect(expected).toEqual(actual);
+});
+
+test('bestFive detects flushes', () => {
+    const hand = [c.TH, c.AH];
+    const community = [c.JS, c.QH, c.KH, c["2H"], c["5H"]];
+    const expected = {rank: HandRank.Flush, hand: [c.AH, c.KH, c.QH, c.TH, c["5H"]]};
+    const actual = bestFive(hand.concat(community));
+
+    expect(expected).toEqual(actual);
+});
+
+test('bestFive detects straights', () => {
+    const hand = [c.TH, c.AS];
+    const community = [c.JS, c.QH, c.KH, c["9C"], c["5H"]];
+    const expected = {rank: HandRank.Straight, hand: [c.AS, c.KH, c.QH, c.JS, c["TH"]]};
+    const actual = bestFive(hand.concat(community));
+
+    expect(expected).toEqual(actual);
+});
+
+test('bestFive detects trips', () => {
+    const hand = [c.TH, c.TS];
+    const community = [c.TD, c["9H"], c["4D"], c.KC, c["5H"]];
+    const expected = {rank: HandRank.Set, hand: [c.TS, c.TH, c.TD, c.KC, c["9H"]]};
+    const actual = bestFive(hand.concat(community));
+
+    expect(expected).toEqual(actual);
+});
+
+test('bestFive detects 2pair', () => {
+    const hand = [c.AH, c.KH];
+    const community = [c.QC, c["9H"], c.AD, c.KC, c["5H"]];
+    const expected = {rank: HandRank.TwoPair, hand: [c.AH, c.AD, c.KH, c.KC, c.QC]};
+    const actual = bestFive(hand.concat(community));
+
+    expect(expected).toEqual(actual);
+});
+
+test('bestFive detects pair', () => {
+    const hand = [c.AH, c.KH];
+    const community = [c.QC, c["9H"], c.AD, c["8C"], c["5H"]];
+    const expected = {rank: HandRank.Pair, hand: [c.AH, c.AD, c.KH, c.QC, c["9H"]]};
+    const actual = bestFive(hand.concat(community));
+
+    expect(expected).toEqual(actual);
+});
+
+test('bestFive detects highcard', () => {
+    const hand = [c.AH, c.KH];
+    const community = [c.QC, c["9H"], c["4C"], c["8C"], c["5H"]];
+    const expected = {rank: HandRank.HighCard, hand: [c.AH, c.KH, c.QC, c["9H"], c["8C"]]};
+    const actual = bestFive(hand.concat(community));
+
+    expect(expected).toEqual(actual);
 });

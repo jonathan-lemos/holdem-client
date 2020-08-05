@@ -70,8 +70,8 @@ export function firstOrUndefined<T>(elems: readonly T[], predicate: (elem: T) =>
     return undefined;
 }
 
-export function enumerate<T>(elems: readonly T[]): [number, T][] {
-    return zip(range(elems.length), elems);
+export function enumerate<T>(elems: readonly T[]): {index: number, elem: T}[] {
+    return zip(range(elems.length), elems, (i, e) => ({index: i, elem: e}));
 }
 
 export function groupBy<TElem>(elems: readonly TElem[], func: (elem: TElem) => string): { [group: string]: TElem[] } {
@@ -138,12 +138,12 @@ export function valueMap<TIn, TOut>(obj: Readonly<{[key: string]: TIn}>, transfo
     return ret;
 }
 
-export function zip<T1, T2>(arr1: readonly T1[], arr2: readonly T2[]): [T1, T2][] {
-    const res: [T1, T2][] = [];
+export function zip<T1, T2, TRet>(arr1: readonly T1[], arr2: readonly T2[], func: (e1: T1, e2: T2) => TRet): TRet[] {
+    const res: TRet[] = [];
     const max = Math.min(arr1.length, arr2.length);
 
     for (let i = 0; i < max; ++i) {
-        res.push([arr1[i], arr2[i]]);
+        res.push(func(arr1[i], arr2[i]));
     }
     return res;
 }
