@@ -1,5 +1,5 @@
 import React from "react";
-import {enumerate, toObject} from "./Linq";
+import {s} from "./Linq";
 
 export enum Rank {
     Two = "2",
@@ -19,7 +19,7 @@ export enum Rank {
 
 export const RankOrder = Object.freeze([Rank.Two, Rank.Three, Rank.Four, Rank.Five, Rank.Six, Rank.Seven, Rank.Eight, Rank.Nine, Rank.Ten, Rank.Jack, Rank.Queen, Rank.King, Rank.Ace]);
 
-export const RankToOrder = Object.freeze(toObject(enumerate(RankOrder), elem => elem.elem, elem => elem.index))
+export const RankToOrder = Object.freeze(s(RankOrder).enumerate().toObject(elem => elem.elem, elem => elem.index));
 
 export enum Suit {
     Diamond = "♦",
@@ -30,7 +30,7 @@ export enum Suit {
 
 export const SuitOrder = Object.freeze([Suit.Diamond, Suit.Club, Suit.Heart, Suit.Spade]);
 
-export const SuitToOrder = Object.freeze(toObject(enumerate(SuitOrder), elem => elem.elem, elem => elem.index))
+export const SuitToOrder = Object.freeze(s(SuitOrder).enumerate().toObject(elem => elem.elem, elem => elem.index));
 
 export enum HandRank {
     HighCard = 0,

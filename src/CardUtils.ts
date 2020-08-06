@@ -1,4 +1,4 @@
-import {any, argMax, enumerate, first, firstOrUndefined, groupBy, none, range, valueMap} from "./Linq";
+import {range, s, valueMap} from "./Linq";
 import {deepEqual} from "./Misc";
 import {CardProps, HandRank, Rank, RankToOrder, SuitToOrder} from "./Card";
 
@@ -40,14 +40,14 @@ export const isStraight = (cards: CardProps[]): boolean => {
 }
 
 export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps, CardProps, CardProps, CardProps, CardProps] } => {
-    const suits = valueMap(groupBy(cards, c => c.suit), handSort);
-    const ranks = valueMap(groupBy(cards, c => c.rank), handSort);
+    const suits = valueMap(s(cards).groupBy(c => c.suit), handSort);
+    const ranks = valueMap(s(cards).groupBy(c => c.rank), handSort);
 
     const maxSuit = Object.keys(suits).reduce((a, c) => a.length >= suits[c].length ? a : suits[c], [] as CardProps[]);
     const maxRank = Object.keys(ranks).reduce((a, c) => a.length >= ranks[c].length ? a : ranks[c], [] as CardProps[]);
 
     if (maxSuit.length >= 5) {
-        let res = firstOrUndefined(range(maxSuit.length - 5).map(n => maxSuit.slice(n, n + 5)), isStraight);
+        let res = range(maxSuit.length - 5).map(n => maxSuit.slice(n, n + 5)).firstOrUndefined(isStraight);
         if (res !== undefined) {
             if (res[0].rank === Rank.Two && res[res.length - 1].rank === Rank.Ace) {
                 res = [res[res.length - 1], ...res.slice(0, -1)]
@@ -57,7 +57,7 @@ export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps
     }
 
     if (maxRank.length === 4) {
-        const lastCard = handSort(cards.filter(card => none(maxRank, mcard => deepEqual(mcard, card))))[0];
+        const lastCard = handSort(cards.filter(card => s(maxRank).none(mcard => deepEqual(mcard, card))))[0];
         return {
             rank: HandRank.Quads,
             hand: [...maxRank, lastCard] as [CardProps, CardProps, CardProps, CardProps, CardProps]
@@ -77,15 +77,15 @@ export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps
         };
     }
 
-    if (any(Object.values(suits), suit => suit.length >= 5)) {
+    if (s(Object.values(suits)).any(suit => suit.length >= 5)) {
         const candidates = Object.values(suits).filter(suit => suit.length >= 5).map(handSort);
         const candTmp = candidates.map(x => [...x]);
         while (candTmp[0].length > 0) {
-            let maxRanks = argMax(candTmp.map(x => x[0]), x => RankToOrder[x.rank]);
+            let maxRanks = s(candTmp.map(x => x[0])).argMax(x => RankToOrder[x.rank]);
             if (maxRanks.length === 1) {
                 return {
                     rank: HandRank.Flush,
-                    hand: first(candidates, c => c[0].suit === maxRanks[0].suit).slice(0, 5) as [CardProps, CardProps, CardProps, CardProps, CardProps]
+                    hand: s(candidates).first(c => c[0].suit === maxRanks[0].suit).slice(0, 5) as [CardProps, CardProps, CardProps, CardProps, CardProps]
                 };
             }
         }
@@ -95,11 +95,11 @@ export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps
         };
     }
 
-    const sorted = handSort(cards);
-    for (let i = 0; i < sorted.length - 5; ++i) {
-        let candidate = (sorted[i].rank === Rank.Two && sorted[sorted.length - 1].rank === Rank.Ace) ?
-            sorted.slice(i, i + 4).concat([sorted[sorted.length - 1]]) :
-            sorted.slice(i, i + 5);
+    const sortedDistinct = s(handSort(cards)).distinct().toArray();
+    for (let i = 0; i < sortedDistinct.length - 5; ++i) {
+        let candidate = (sortedDistinct[i].rank === Rank.Two && sortedDistinct[sortedDistinct.length - 1].rank === Rank.Ace) ?
+            sortedDistinct.slice(i, i + 4).concat([sortedDistinct[sortedDistinct.length - 1]]) :
+            sortedDistinct.slice(i, i + 5);
 
         if (isStraight(candidate)) {
             if (candidate[0].rank === Rank.Two && candidate[candidate.length - 1].rank === Rank.Ace) {
@@ -114,14 +114,14 @@ export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps
 
     if (trips.length > 0) {
         const trip = trips[trips.length - 1];
-        const rem = handSort(cards.filter(card => none(trip, mcard => deepEqual(card, mcard)))).slice(0, 2);
+        const rem = handSort(cards.filter(card => s(trip).none(mcard => deepEqual(card, mcard)))).slice(0, 2);
 
         return {rank: HandRank.Set, hand: [...trip, ...rem] as [CardProps, CardProps, CardProps, CardProps, CardProps]};
     }
 
     if (pairs.length >= 2) {
         const [p1, p2] = [pairs.pop() as CardProps[], pairs.pop() as CardProps[]];
-        const lastCard = handSort(cards.filter(card => none(p1.concat(p2), mcard => deepEqual(card, mcard))))[0];
+        const lastCard = handSort(cards.filter(card => s(p1.concat(p2)).none(mcard => deepEqual(card, mcard))))[0];
 
         return {
             rank: HandRank.TwoPair,
@@ -131,7 +131,7 @@ export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps
 
     if (pairs.length === 1) {
         const pair = pairs[0]
-        const lastCards = handSort(cards.filter(card => none(pair, mcard => deepEqual(card, mcard)))).slice(0, 3);
+        const lastCards = handSort(cards.filter(card => s(pair).none(mcard => deepEqual(card, mcard)))).slice(0, 3);
 
         return {
             rank: HandRank.Pair,
@@ -141,23 +141,27 @@ export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps
 
     return {
         rank: HandRank.HighCard,
-        hand: sorted.slice(0, 5) as [CardProps, CardProps, CardProps, CardProps, CardProps]
+        hand: handSort(cards).slice(0, 5) as [CardProps, CardProps, CardProps, CardProps, CardProps]
     };
 }
 
 export function getWinners(
-    community: [CardProps, CardProps, CardProps, CardProps, CardProps],
-    hands: [CardProps, CardProps][]): { winners: [CardProps, CardProps][], hand: [CardProps, CardProps, CardProps, CardProps, CardProps] } {
+    community: CardProps[],
+    hands: [CardProps, CardProps][]): { winner: [CardProps, CardProps], hand: [CardProps, CardProps, CardProps, CardProps, CardProps], rank: HandRank }[] {
 
-    const bestHands = enumerate(hands.map(h => bestFive([...community, ...h])));
+    if (community.length !== 5) {
+        throw new Error("Community card length must be 5");
+    }
 
-    let candidates = argMax(bestHands, hand => hand.elem.rank);
+    const bestHands = s(hands).map(h => bestFive([...community, ...h])).enumerate();
+
+    let candidates = s(bestHands).argMax(hand => hand.elem.rank);
     for (let i = 0; i < 5; ++i) {
         if (candidates.length === 1) {
             break;
         }
-        candidates = argMax(candidates, cand => RankToOrder[cand.elem.hand[i].rank]);
+        candidates = s(candidates).argMax(cand => RankToOrder[cand.elem.hand[i].rank]);
     }
 
-    return {winners: candidates.map(x => hands[x.index]), hand: candidates[0].elem.hand};
+    return candidates.map(x => ({winner: hands[x.index], hand: x.elem.hand, rank: x.elem.rank}));
 }

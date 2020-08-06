@@ -1,5 +1,5 @@
-import {HandRank, Rank, Suit} from "../Card";
-import {bestFive} from "../CardUtils";
+import Card, {CardProps, HandRank, Rank, Suit} from "../Card";
+import {bestFive, getWinners} from "../CardUtils";
 
 // const c = (rank: Rank, suit: Suit) => ({rank, suit});
 
@@ -136,6 +136,86 @@ test('bestFive detects highcard', () => {
     const community = [c.QC, c["9H"], c["4C"], c["8C"], c["5H"]];
     const expected = {rank: HandRank.HighCard, hand: [c.AH, c.KH, c.QC, c["9H"], c["8C"]]};
     const actual = bestFive(hand.concat(community));
+
+    expect(expected).toEqual(actual);
+});
+
+test('compare gets same rank right', () => {
+    const hand1: [CardProps, CardProps] = [c.AH, c.KH];
+    const hand2: [CardProps, CardProps] = [c.QS, c.QD];
+    const community: CardProps[] = [c["8D"], c["9H"], c["4C"], c["2C"], c.AS];
+    const expected = [{winner: hand1, hand: [c.AS, c.AH, c.KH, c["9H"], c["8D"]], rank: HandRank.Pair}];
+    const actual = getWinners(community, [hand1, hand2]);
+
+    expect(expected).toEqual(actual);
+});
+
+test('compare gets different ranks right', () => {
+    const hand1: [CardProps, CardProps] = [c.AH, c.KH];
+    const hand2: [CardProps, CardProps] = [c.TS, c.TD];
+    const community: CardProps[] = [c["8D"], c["9H"], c["4C"], c["2C"], c.JS];
+    const expected = [{winner: hand2, hand: [c.TS, c.TD, c.JS, c["9H"], c["8D"]], rank: HandRank.Pair}];
+    const actual = getWinners(community, [hand1, hand2]);
+
+    expect(expected).toEqual(actual);
+});
+
+test('compare gets different flushes right', () => {
+    const hand1: [CardProps, CardProps] = [c.AH, c["3H"]];
+    const hand2: [CardProps, CardProps] = [c.KH, c.QH];
+    const community: CardProps[] = [c.JH, c["9H"], c["4C"], c["2C"], c["6H"]];
+    const expected = [{winner: hand1, hand: [c.AH, c.JH, c["9H"], c["6H"], c["3H"]], rank: HandRank.Flush}];
+    const actual = getWinners(community, [hand1, hand2]);
+
+    expect(expected).toEqual(actual);
+});
+
+test('compare gets different straights right', () => {
+    const hand1: [CardProps, CardProps] = [c.TC, c["8C"]];
+    const hand2: [CardProps, CardProps] = [c.AH, c["8D"]];
+    const community: CardProps[] = [c["9D"], c["7S"], c["6C"], c["2H"], c["5H"]];
+    const expected = [{winner: hand1, hand: [c.TC, c["9D"], c["8C"], c["7S"], c["6C"]], rank: HandRank.Straight}];
+    const actual = getWinners(community, [hand1, hand2]);
+
+    expect(expected).toEqual(actual);
+});
+
+test('compare splits pot right', () => {
+    const hand1: [CardProps, CardProps] = [c.TC, c["8C"]];
+    const hand2: [CardProps, CardProps] = [c.AH, c["8D"]];
+    const community: CardProps[] = [c["9D"], c["7S"], c["6C"], c["TH"], c["5H"]];
+    const expected = [
+        {winner: hand1, hand: [c.TC, c["9D"], c["8C"], c["7S"], c["6C"]], rank: HandRank.Straight},
+        {winner: hand2, hand: [c.TH, c["9D"], c["8D"], c["7S"], c["6C"]], rank: HandRank.Straight}
+        ];
+    const actual = getWinners(community, [hand1, hand2]);
+
+    expect(expected).toEqual(actual);
+});
+
+test('compare multiway pot right', () => {
+    const hand1: [CardProps, CardProps] = [c.AD, c.AC];
+    const hand2: [CardProps, CardProps] = [c.AS, c.KS];
+    const hand3: [CardProps, CardProps] = [c.QS, c.QD];
+
+    const community: CardProps[] = [c["9D"], c["7S"], c["6C"], c.QH, c.AH];
+    const expected = [{winner: hand1, hand: [c.AH, c.AC, c.AD, c.QH, c["9D"]], rank: HandRank.Set}];
+    const actual = getWinners(community, [hand1, hand2, hand3]);
+
+    expect(expected).toEqual(actual);
+});
+
+test('compare multiway split pot right', () => {
+    const hand1: [CardProps, CardProps] = [c.AD, c.AC];
+    const hand2: [CardProps, CardProps] = [c.AS, c.KS];
+    const hand3: [CardProps, CardProps] = [c.QS, c.QD];
+
+    const community: CardProps[] = [c.KH, c.QC, c["6C"], c.JD, c.TH];
+    const expected = [
+        {winner: hand1, hand: [c.AD, c.KH, c.QC, c.JD, c.TH], rank: HandRank.Straight},
+        {winner: hand2, hand: [c.AS, c.KH, c.QC, c.JD, c.TH], rank: HandRank.Straight}
+        ];
+    const actual = getWinners(community, [hand1, hand2, hand3]);
 
     expect(expected).toEqual(actual);
 });
