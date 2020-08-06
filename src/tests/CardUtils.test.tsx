@@ -212,8 +212,8 @@ test('compare multiway split pot right', () => {
 
     const community: CardProps[] = [c.KH, c.QC, c["6C"], c.JD, c.TH];
     const expected = [
-        {winner: hand1, hand: [c.AD, c.KH, c.QC, c.JD, c.TH], rank: HandRank.Straight},
-        {winner: hand2, hand: [c.AS, c.KH, c.QC, c.JD, c.TH], rank: HandRank.Straight}
+        {winner: hand1, hand: [c.AC, c.KH, c.QC, c.JD, c.TH], rank: HandRank.Straight},
+        {winner: hand2, hand: [c.AS, c.KS, c.QC, c.JD, c.TH], rank: HandRank.Straight}
         ];
     const actual = getWinners(community, [hand1, hand2, hand3]);
 

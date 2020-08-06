@@ -95,7 +95,7 @@ export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps
         };
     }
 
-    const sortedDistinct = s(handSort(cards)).distinct().toArray();
+    const sortedDistinct = s(handSort(cards)).distinct((c1, c2) => c1.rank === c2.rank).toArray();
     for (let i = 0; i < sortedDistinct.length - 5; ++i) {
         let candidate = (sortedDistinct[i].rank === Rank.Two && sortedDistinct[sortedDistinct.length - 1].rank === Rank.Ace) ?
             sortedDistinct.slice(i, i + 4).concat([sortedDistinct[sortedDistinct.length - 1]]) :

@@ -281,7 +281,7 @@ export class Stream<T> {
 
     public toArray(): T[] {
         const ret: T[] = [];
-        this.forEach(ret.push);
+        this.forEach(e => ret.push(e));
         return ret;
     }
 
