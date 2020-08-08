@@ -1,4 +1,4 @@
-import Card, {CardProps, HandRank, Rank, Suit} from "../Card";
+import {CardProps, HandRank, Rank, Suit} from "../Card";
 import {bestFive, getWinners} from "../CardUtils";
 
 // const c = (rank: Rank, suit: Suit) => ({rank, suit});
@@ -180,12 +180,22 @@ test('compare gets different straights right', () => {
     expect(expected).toEqual(actual);
 });
 
+test('compare gets ace straight right', () => {
+    const hand1: [CardProps, CardProps] = [c["6S"], c["5S"]];
+    const hand2: [CardProps, CardProps] = [c["5H"], c["5D"]];
+    const community: CardProps[] = [c["9D"], c.AS, c["3C"], c["2H"], c["4H"]];
+    const expected = [{winner: hand1, hand: [c["6S"], c["5S"], c["4H"], c["3C"], c["2H"]], rank: HandRank.Straight}];
+    const actual = getWinners(community, [hand1, hand2]);
+
+    expect(expected).toEqual(actual);
+});
+
 test('compare splits pot right', () => {
     const hand1: [CardProps, CardProps] = [c.TC, c["8C"]];
     const hand2: [CardProps, CardProps] = [c.AH, c["8D"]];
     const community: CardProps[] = [c["9D"], c["7S"], c["6C"], c["TH"], c["5H"]];
     const expected = [
-        {winner: hand1, hand: [c.TC, c["9D"], c["8C"], c["7S"], c["6C"]], rank: HandRank.Straight},
+        {winner: hand1, hand: [c.TH, c["9D"], c["8C"], c["7S"], c["6C"]], rank: HandRank.Straight},
         {winner: hand2, hand: [c.TH, c["9D"], c["8D"], c["7S"], c["6C"]], rank: HandRank.Straight}
         ];
     const actual = getWinners(community, [hand1, hand2]);

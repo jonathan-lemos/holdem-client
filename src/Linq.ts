@@ -102,6 +102,24 @@ export class Stream<T> {
         return this.none(e => !predicate(e));
     }
 
+    public concat(other: Enumerable<T>): Stream<T> {
+        return s((function* (it: Iterator<T>) {
+            const o = s(other);
+
+            let res = it.next();
+            while (!res.done) {
+                yield res.value;
+                res = it.next();
+            }
+
+            res = o.iterator.next();
+            while (!res.done) {
+                yield res.value;
+                res = o.iterator.next();
+            }
+        })(this.iterator));
+    }
+
     public count(): number {
         let result = this.iterator.next();
         let no = 0;
@@ -212,6 +230,10 @@ export class Stream<T> {
         return ret;
     }
 
+    public [Symbol.iterator](): Iterator<T> {
+        return this.iterator;
+    }
+
     public map<TRet>(transform: (elem: T) => TRet): Stream<TRet> {
         return s((function* (e: Iterator<T>) {
             let res = e.next();
@@ -277,6 +299,15 @@ export class Stream<T> {
                 res = it.next();
             }
         }(this.iterator))
+    }
+
+    public take(n: number): Stream<T> {
+        return s((function* (it: Iterator<T>) {
+            let res = it.next();
+            for (let i = 0; i < n && !res.done; ++i, res = it.next()) {
+                yield res.value;
+            }
+        })(this.iterator));
     }
 
     public toArray(): T[] {

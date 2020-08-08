@@ -16,23 +16,21 @@ export const handSort = (cards: CardProps[]): CardProps[] => {
 }
 
 export const isStraight = (cards: CardProps[]): boolean => {
-    const sorted = handSort(cards);
-
     if (cards.length < 2) {
         return true;
     }
 
-    let prev = RankToOrder[sorted[0].rank];
+    let prev = RankToOrder[cards[0].rank];
 
-    for (let i = 1; i < sorted.length - 1; ++i) {
-        let cur = RankToOrder[sorted[i].rank];
+    for (let i = 1; i < cards.length - 1; ++i) {
+        let cur = RankToOrder[cards[i].rank];
         if (cur !== prev - 1) {
             return false;
         }
         prev = cur;
     }
 
-    if (cards[0].rank === Rank.Two && cards[cards.length - 1].rank === Rank.Ace) {
+    if (cards[0].rank === Rank.Five && cards[cards.length - 1].rank === Rank.Ace) {
         return true;
     }
 
@@ -96,20 +94,19 @@ export const bestFive = (cards: CardProps[]): { rank: HandRank, hand: [CardProps
     }
 
     const sortedDistinct = s(handSort(cards)).distinct((c1, c2) => c1.rank === c2.rank).toArray();
-    for (let i = 0; i < sortedDistinct.length - 5; ++i) {
-        let candidate = (sortedDistinct[i].rank === Rank.Two && sortedDistinct[sortedDistinct.length - 1].rank === Rank.Ace) ?
-            sortedDistinct.slice(i, i + 4).concat([sortedDistinct[sortedDistinct.length - 1]]) :
-            sortedDistinct.slice(i, i + 5);
+    let straightCandidates = range(sortedDistinct.length - 4)
+        .map(i => sortedDistinct.slice(i, i + 5));
 
-        if (isStraight(candidate)) {
-            if (candidate[0].rank === Rank.Two && candidate[candidate.length - 1].rank === Rank.Ace) {
-                candidate = [candidate[candidate.length - 1], ...candidate.slice(0, -1)]
-            }
-            return {
-                rank: HandRank.Straight,
-                hand: candidate as [CardProps, CardProps, CardProps, CardProps, CardProps]
-            };
+    if (sortedDistinct[0].rank === Rank.Ace) {
+        const twoElem = s(sortedDistinct).enumerate().firstOrUndefined(e => e.elem.rank === Rank.Two);
+        if (twoElem !== undefined && twoElem.index >= 5) {
+            straightCandidates = straightCandidates.concat([[...sortedDistinct.slice(twoElem.index - 3, twoElem.index + 1), sortedDistinct[0]]]);
         }
+    }
+
+    const straightCandidate = straightCandidates.firstOrUndefined(isStraight);
+    if (straightCandidate !== undefined) {
+        return {rank: HandRank.Straight, hand: straightCandidate as [CardProps, CardProps, CardProps, CardProps, CardProps]};
     }
 
     if (trips.length > 0) {
