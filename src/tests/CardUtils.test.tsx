@@ -180,11 +180,21 @@ test('compare gets different straights right', () => {
     expect(expected).toEqual(actual);
 });
 
-test('compare gets ace straight right', () => {
+test('compare gets ace straight rank right', () => {
     const hand1: [CardProps, CardProps] = [c["6S"], c["5S"]];
     const hand2: [CardProps, CardProps] = [c["5H"], c["5D"]];
     const community: CardProps[] = [c["9D"], c.AS, c["3C"], c["2H"], c["4H"]];
     const expected = [{winner: hand1, hand: [c["6S"], c["5S"], c["4H"], c["3C"], c["2H"]], rank: HandRank.Straight}];
+    const actual = getWinners(community, [hand1, hand2]);
+
+    expect(expected).toEqual(actual);
+});
+
+test('compare sees ace straight', () => {
+    const hand1: [CardProps, CardProps] = [c["7S"], c["6S"]];
+    const hand2: [CardProps, CardProps] = [c["5H"], c["5D"]];
+    const community: CardProps[] = [c["9D"], c.AS, c["3C"], c["2H"], c["4H"]];
+    const expected = [{winner: hand2, hand: [c["5H"], c["4H"], c["3C"], c["2H"], c.AS], rank: HandRank.Straight}];
     const actual = getWinners(community, [hand1, hand2]);
 
     expect(expected).toEqual(actual);

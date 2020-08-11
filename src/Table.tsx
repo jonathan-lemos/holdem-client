@@ -1,5 +1,6 @@
 import React from 'react';
-import Player from "./Player";
+import Player, {PlayerProps} from "./Player";
+import {Blinds} from "./Blinds";
 
 
 export interface TableProps {
@@ -7,11 +8,9 @@ export interface TableProps {
 }
 
 export interface TableState {
-    ante: Number,
-    bigBlind: Number,
-    players: Player[],
+    blinds: Blinds,
+    players: PlayerProps[],
     pot: Number,
-    smallBlind: Number
 }
 
 export class Table extends React.Component<TableProps, TableState> {
@@ -23,9 +22,9 @@ export class Table extends React.Component<TableProps, TableState> {
             sideCount = (this.state.players.length - topCount) / 2;
         }
 
-        const leftList: Player[] = [];
-        const midList: Player[] = [];
-        const rightList: Player[] = [];
+        const leftList: PlayerProps[] = [];
+        const midList: PlayerProps[] = [];
+        const rightList: PlayerProps[] = [];
 
         for (let i = sideCount - 1; i > 0; --i) {
             leftList.push(this.state.players[i]);
@@ -37,18 +36,18 @@ export class Table extends React.Component<TableProps, TableState> {
             rightList.push(this.state.players[i]);
         }
 
-        x = <Player props={}
+        const mapPlayer = (player: PlayerProps) => <Player {...player} key={player.displayName} />;
 
         return (<div className="w-100 d-flex flex-column">
             {/* players on top */}
             <div className="w-100 d-flex justify-content-center">
-                {midList}
+                {midList.map(mapPlayer)}
             </div>
             {/* middle section */}
             <div className="h-100 w-100 d-flex flex-grow-1">
                 {/* players on left */}
                 <div className="w-100 d-flex flex-column">
-                    {leftList}
+                    {leftList.map(mapPlayer)}
                 </div>
                 {/* cards + pot */}
                 <div className="w-100 flex-grow-1">
@@ -56,7 +55,7 @@ export class Table extends React.Component<TableProps, TableState> {
                 </div>
                 {/* players on right */}
                 <div className="w-100 d-flex flex-column">
-                    {rightList}
+                    {rightList.map(mapPlayer)}
                 </div>
             </div>
             {/* current player controls */}
