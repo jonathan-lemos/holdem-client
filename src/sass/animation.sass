@@ -1,0 +1,17 @@
+@keyframes expand-y-in
+  from
+    transform: scaleY(0)
+  to
+    transform: scaleY(1)
+
+@keyframes expand-y-out
+  from
+    transform: scaleY(1)
+  to
+    transform: scaleY(0)
+
+$animation-time: 0.3s
+$animation-type: ease
+
+.expand-from-bottom
+  animation: expand-y-in $animation-time $animation-type forwards

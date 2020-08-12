@@ -1,0 +1,48 @@
+@use 'sass:color'
+@use 'container'
+
+$button-radius: 0.25em
+$transition-time: 0.2s
+$button-height: 3em
+
+=colored-button($color)
+  background-color: $color
+  height: $button-height
+  transition: $transition-time
+
+  &:disabled
+    background-color: color.scale($color, $saturation: -25%)
+    opacity: 50%
+    pointer-events: none
+
+  &:hover
+    background-color: color.scale($color, $saturation: +25%, $lightness: -33%)
+
+div.button-bar
+  @extend .flex-row
+
+  & > *
+    border-radius: 0
+
+  &:first-child
+    border-bottom-left-radius: $button-radius
+    border-top-left-radius: $button-radius
+
+  &:last-child
+    border-top-right-radius: $button-radius
+    border-bottom-right-radius: $button-radius
+
+.fold-button
+  +colored-button(deepskyblue)
+
+.check-call-button
+  +colored-button(lightgreen)
+
+.raise-button
+  +colored-button(tomato)
+
+.confirm-button
+  +colored-button(aquamarine)
+
+.cancel-button
+  +colored-button(tomato)

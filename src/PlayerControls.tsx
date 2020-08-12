@@ -15,7 +15,7 @@ export function RaiseSlider({increments, onChange, initialIndex = 0}: RaiseSlide
         onChange(increments[val]);
     };
 
-    return <input className="w-100 raise-slider" type="slider" min={0} max={increments.length - 1} value={initialIndex}
+    return <input className="w-100 raise-slider" type="slider" min={0} max={increments.length - 1} defaultValue={initialIndex}
                   onInput={handleInput}/>;
 }
 
@@ -56,7 +56,8 @@ export default function PlayerControls({bigBlind, onAction, pot, preflop, prevBe
                         <RaiseSlider increments={increments} onChange={v => raiseValue = v}/>
                         <div className="w-100 d-flex">
                             <div className="w-100 h-100 flex-grow-1 raise-controls-data">
-
+                                <span>{Math.round(100 * raiseValue / pot)}% Pot</span>
+                                <span>{Math.round(10 * raiseValue / bigBlind) / 10} BB</span>
                             </div>
                             <div className="h-100 raise-controls-confirm-button" onClick={() => onAction({
                                 allIn: raiseValue === stack,
@@ -75,7 +76,7 @@ export default function PlayerControls({bigBlind, onAction, pot, preflop, prevBe
                     className={`w-100 flex-grow-1 mx-4 player-controls-button fold-button ${toCall ? "" : "player-controls-button-disabled"}`}
                     onClick={() => onAction({type: TableActionType.Fold})}>Fold
                 </div>
-                <div className="w-100 flex-grow-1 mx-4 call-button"
+                <div className="w-100 flex-grow-1 mx-4 player-controls-button call-button"
                      onClick={() => onAction({type: toCall ? TableActionType.Call : TableActionType.Check})}>{toCall ? `Call ${toCall}` : "Check"}</div>
                 <div className="w-100 flex-grow-1 mx-4 call-button" onClick={() => {
                     setIsRaising(!isRaising);
