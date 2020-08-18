@@ -29,7 +29,7 @@ export interface PlayerControlsProps {
     toCall?: number;
 }
 
-export default function PlayerControls({bigBlind, onAction, pot, preflop, prevBetSize, stack, toCall = 0}: PlayerControlsProps) {
+export default function PlayerHUD({bigBlind, onAction, pot, preflop, prevBetSize, stack, toCall = 0}: PlayerControlsProps) {
     const [isRaising, setIsRaising] = useState(false);
     const [hasRaised, setHasRaised] = useState(false);
 
@@ -50,6 +50,8 @@ export default function PlayerControls({bigBlind, onAction, pot, preflop, prevBe
 
     return (
         <div className="w-100 h-100 d-flex flex-column player-controls">
+            
+
             <Transition expanding={isRaising} from={FromType.Bottom}>
                 <div className={`position-relative w-100 ${hasRaised ? "" : "hidden"}`}>
                     <div className="position-absolute d-flex flex-column raise-controls">
@@ -77,7 +79,7 @@ export default function PlayerControls({bigBlind, onAction, pot, preflop, prevBe
                     onClick={() => onAction({type: TableActionType.Fold})}>Fold
                 </div>
                 <div className="w-100 flex-grow-1 mx-4 player-controls-button call-button"
-                     onClick={() => onAction({type: toCall ? TableActionType.Call : TableActionType.Check})}>{toCall ? `Call ${toCall}` : "Check"}</div>
+                     onClick={() => onAction({type: toCall ? TableActionType.Call : TableActionType.Check})}>{toCall ? <span>Call<br/>{toCall}</span> : "Check"}</div>
                 <div className="w-100 flex-grow-1 mx-4 call-button" onClick={() => {
                     setIsRaising(!isRaising);
                     setHasRaised(true);

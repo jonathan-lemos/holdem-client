@@ -1,0 +1,39 @@
+@use 'themes' as *
+@use 'sass:color'
+@use 'container'
+@use 'spacing'
+@use 'border'
+
+=box-base
+  @extend .flex-col
+  @extend .p-l
+  @extend .align-items-center
+
+  border-radius: 0.25em
+  transition: 0.3s
+
+  @include themify($themes)
+    background-color: themed("element-bg-color")
+
+  &:hover
+    @include themify($themes)
+      background-color: color-hover(themed("element-bg-color"))
+
+  &.folded
+    opacity: 50%
+
+    & *
+      pointer-events: none
+
+.villain-box
+  +box-base
+  height: 12em
+  width: 12em
+
+  &.acting
+    @extend .border-glow
+
+.hero-box
+  +box-base
+  height: 20em
+  width: 20em

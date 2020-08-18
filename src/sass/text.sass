@@ -1,2 +1,8 @@
-=text-base
+.nowrap
+  overflow: hidden
+  text-overflow: ellipsis
   white-space: nowrap
+
+@each $mult in (25, 50, 75, 100, 150, 200, 250, 300, 400, 600)
+  .size-#{$mult}
+    font-size: $mult%

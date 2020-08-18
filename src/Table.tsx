@@ -1,7 +1,7 @@
 import React from 'react';
 import Player, {PlayerActionState, PlayerProps} from "./Player";
 import {Blinds} from "./Blinds";
-import PlayerControls from "./PlayerControls";
+import PlayerHUD from "./PlayerHUD";
 
 
 export interface TableProps {
@@ -33,7 +33,7 @@ export class Table extends React.Component<TableProps, TableState> {
         const midList: PlayerProps[] = [];
         const rightList: PlayerProps[] = [];
 
-        for (let i = sideCount - 1; i > 0; --i) {
+        for (let i = 0; i < sideCount; ++i) {
             leftList.push(this.state.opponents[i]);
         }
         for (let i = sideCount; i < sideCount + topCount; ++i) {
@@ -45,28 +45,28 @@ export class Table extends React.Component<TableProps, TableState> {
 
         const mapPlayer = (player: PlayerProps) => <Player {...player} key={player.displayName} />;
 
-        return (<div className="w-100 h-100 d-flex flex-column">
+        return (<div className="flex-col align-center">
             {/* players on top */}
-            <div className="w-100 d-flex justify-content-center">
+            <div className="flex-row align-center justify-space-between my-2 px-4">
                 {midList.map(mapPlayer)}
             </div>
             {/* middle section */}
-            <div className="h-100 w-100 d-flex flex-grow-1">
+            <div className="flex-grow-1 flex-row align-center">
                 {/* players on left */}
-                <div className="w-100 d-flex flex-column">
+                <div className="flex-col reverse align-center">
                     {leftList.map(mapPlayer)}
                 </div>
                 {/* cards + pot */}
-                <div className="w-100 flex-grow-1">
+                <div className="flex-grow-1">
 
                 </div>
                 {/* players on right */}
-                <div className="w-100 d-flex flex-column">
+                <div className="flex-col align-center">
                     {rightList.map(mapPlayer)}
                 </div>
             </div>
             {/* current player controls */}
-            <PlayerControls bigBlind={this.state.blinds.bigBlind} onAction={() => {}} pot={this.state.pot} preflop={true} stack={10000} />
+            <PlayerHUD bigBlind={this.state.blinds.bigBlind} onAction={() => {}} pot={this.state.pot} preflop={true} stack={10000} />
         </div>);
     }
 }

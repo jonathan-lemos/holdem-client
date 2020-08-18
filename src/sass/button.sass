@@ -9,6 +9,7 @@ $button-height: 3em
   background-color: $color
   height: $button-height
   transition: $transition-time
+  text-align: center
 
   &:disabled
     background-color: color.scale($color, $saturation: -25%)
@@ -20,6 +21,7 @@ $button-height: 3em
 
 div.button-bar
   @extend .flex-row
+  @extend .align-center
 
   & > *
     border-radius: 0
@@ -30,6 +32,21 @@ div.button-bar
 
   &:last-child
     border-top-right-radius: $button-radius
+    border-bottom-right-radius: $button-radius
+
+div.button-bar-col
+  @extend .flex-col
+  @extend .align-center
+
+  & > *
+    border-radius: 0
+
+  &:first-child
+    border-top-left-radius: $button-radius
+    border-top-right-radius: $button-radius
+
+  &:last-child
+    border-bottom-left-radius: $button-radius
     border-bottom-right-radius: $button-radius
 
 .fold-button

@@ -1,0 +1,21 @@
+@use 'themes' as *
+
+@include themify($themes)
+  @keyframes glow-animation
+    0%
+      border: 0.1em solid themed("glow-color")
+      box-shadow: 0 0 0.25em themed("glow-color")
+    50%
+      border: 0.2em solid themed("glow-color")
+      box-shadow: 0 0 0.5em themed("glow-color")
+    100%
+      border: 0.1em solid themed("glow-color")
+      box-shadow: 0 0 0.25em themed("glow-color")
+
+  .border-glow
+    -webkit-animation: glow-animation 0.5s ease infinite
+    -o-animation: glow-animation 0.5s ease infinite
+    animation: glow-animation 0.5s ease infinite
+
+  .border
+    border: 1px solid black
