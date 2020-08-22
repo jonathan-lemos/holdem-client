@@ -2,6 +2,7 @@ import {PlayerAction, TableActionType} from "./TableAction";
 import React, {FormEvent, useState} from "react";
 import Transition, {FromType} from "./Transition";
 import { s } from "./Linq";
+import BaseProps from "./BaseProps";
 
 export interface RaiseSliderProps {
     increments: number[];
@@ -9,13 +10,13 @@ export interface RaiseSliderProps {
     onChange: (val: number) => void;
 }
 
-export function RaiseSlider({increments, onChange, initialIndex = 0}: RaiseSliderProps) {
+export function RaiseSlider({increments, onChange, initialIndex = 0, style, className}: RaiseSliderProps & BaseProps) {
     const handleInput = (e: FormEvent<HTMLInputElement>) => {
         const val = Number(e.currentTarget.value);
         onChange(increments[val]);
     };
 
-    return <input className="w-100 raise-slider" type="slider" min={0} max={increments.length - 1} defaultValue={initialIndex}
+    return <input className={`raise-slider ${className ?? ""}`} style={style} type="slider" min={0} max={increments.length - 1} defaultValue={initialIndex}
                   onInput={handleInput}/>;
 }
 

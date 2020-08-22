@@ -1,5 +1,7 @@
-import React, {CSSProperties, useState} from "react";
+import React, {useState} from "react";
 import {range, s} from "./Linq";
+import BaseProps from "./BaseProps";
+import {animate, animateStyleDefaults, SelectedAnimationProps} from "./Animated";
 
 export enum Rank {
     Two = "2",
@@ -34,7 +36,7 @@ export const SuitToOrder = Object.freeze(s(SuitOrder).enumerate().toObject(elem 
 
 export enum HandRank {
     HighCard = 0,
-    Pair= 1,
+    Pair = 1,
     TwoPair = 2,
     Set = 3,
     Straight = 5,
@@ -45,97 +47,120 @@ export enum HandRank {
 }
 
 export interface CardProps {
-    rank: Rank,
-    suit: Suit
+    rank: Rank;
+    suit: Suit;
 }
 
 export interface CardComponentProps {
-    card?: CardProps
-    className?: string
-    style?: CSSProperties
-    animationDurationMs?: number
-    animationDelayMs?: number
+    card?: CardProps;
+    entry?: SelectedAnimationProps;
+    flipOut?: SelectedAnimationProps;
+    flipIn?: SelectedAnimationProps;
+    onAnimationComplete?: () => void;
 }
 
-export default function Card(props: CardComponentProps) {
-    const delay = props.animationDelayMs ?? 0;
-    const dur = props.animationDurationMs ?? 0;
-    const noAnimation = delay + dur === 0;
+export default function Card({card, className, style, entry, flipOut, flipIn, onAnimationComplete}: CardComponentProps & BaseProps) {
+    entry = entry ?? {delayMs: 0, durationMs: 100};
 
-    const [frontClass, setFrontClass] = useState("border bg-white position-absolute frontside");
-    const [backClass, setBackClass] = useState("border bg-blue position-relative backside");
+    const [frontStyle, setFrontStyle] = useState({...animateStyleDefaults, opacity: 0});
+    const [backStyle, setBackStyle] = useState({...animateStyleDefaults, opacity: 1});
 
-    const [frontStyle, setFrontStyle] = useState({
-        opacity: noAnimation ? 1 : 0,
-        animationDuration: `${dur}ms`,
+    animate(backStyle, setBackStyle, [
+        {...(entry ? {...entry, type: "expand-in"} : {type: "none"})},
+        {...(flipOut ? {...flipOut, type: "flip-out"} : {type: "none"})},
+    ]).then(async () => {
+        if (card != null) {
+            await animate(frontStyle, setFrontStyle, {...(flipIn ? {...flipIn, type: "flip-in"} : {type: "none"})});
+        }
+        onAnimationComplete && onAnimationComplete();
     });
-    const [backStyle, setBackStyle] = useState({
-        opacity: noAnimation ? 0 : 1,
-        animationDuration: `${dur}ms`
-    });
 
-    if (!noAnimation) {
-        setTimeout(() => {
-            setBackClass(`${backClass} expand-in`);
-        }, delay);
-
-        setTimeout(() => {
-            setBackClass(backClass.replace("expand-in", "fold-out"));
-        }, delay + dur);
-
-        setTimeout(() => {
-            setBackStyle(Object.assign({...backStyle}, {opacity: props.card != null ? 0 : 1}));
-            setFrontStyle(Object.assign({...frontStyle}, {opacity: props.card != null ? 1 : 0}));
-            setFrontClass(`${frontClass} flip-in`);
-        }, delay + dur + dur);
-    }
-
-    if (props.card == null) {
-        return <div className={`${props.className ?? ""} position-relative`}>
+    if (card == null) {
+        return <div className={`${className ?? ""} position-relative`} style={style}>
             <div className="border bg-blue position-relative backside" style={backStyle}/>
         </div>;
     }
 
-    return <div className={`${props.className ?? ""} position-relative`}>
-        <div className={backClass} style={backStyle}/>
-        <div className={frontClass} style={frontStyle}>
-            <b><span className="size-400">{props.card.rank}-{props.card.suit}</span></b>
+    return <div className={className} style={style}>
+        <div className="border bg-blue position-relative backside" style={backStyle}/>
+        <div className="border bg-white position-absolute frontside" style={frontStyle}>
+            <b><span className="size-400">{card.rank}-{card.suit}</span></b>
         </div>
     </div>;
 }
 
 export interface CardViewProps {
-    animateRange?: number | [number] | [number, number];
-    animationLen?: number;
-    cardStaggerLen?: number;
-    numTotalCards?: number;
-    cards: CardProps[]
+    initialCards?: (CardProps | undefined)[];
+    maxLen: number;
 }
 
-export function CardView({animateRange, animationLen, cardStaggerLen, numTotalCards, cards}: CardViewProps) {
-    if (numTotalCards === undefined || numTotalCards > cards.length) {
-        throw new Error("numTotalCards must be >= the number of cards")
+export interface CardState {
+    card?: CardProps;
+    animated: boolean;
+}
+
+export interface CardViewState {
+    cards: CardState[];
+}
+
+export class CardView extends React.Component<CardViewProps & BaseProps, CardViewState> {
+    public constructor(props: CardViewProps & BaseProps) {
+        super(props);
+
+        const c = props.initialCards?.map(card => ({card: card, animated: false})) ?? [];
+        if (props.maxLen < 0) {
+            throw new Error(`maxLen cannot be < 0 (was ${props.maxLen})`);
+        }
+        if (props.maxLen > c.length) {
+            throw new Error(`Number of cards given (${c.length}) exceeds the maxLen (${props.maxLen}).`);
+        }
+
+        this.state = {cards: c};
     }
 
-    const stagger = cardStaggerLen ?? 0;
-
-    let animate: (number | null)[];
-    if (animateRange === undefined) {
-        animate = range(numTotalCards).map(_ => null).toArray();
-    }
-    else if (typeof animateRange === "number") {
-        animate = range(numTotalCards).map(i => i === animateRange ? 0 : null).toArray();
-    }
-    else if (animateRange.length === 1) {
-        animate = range(numTotalCards).map(i => i >= animateRange[0] ? (i - animateRange[0]) * stagger : null).toArray();
-    }
-    else {
-        animate = range(numTotalCards).map(i => i >= animateRange[0] && i < animateRange[1] ? (i - animateRange[0]) * stagger : null).toArray();
+    public push(card: CardProps) {
+        if (this.state.cards.length >= this.props.maxLen) {
+            throw new Error("This CardView cannot accept any more cards");
+        }
+        this.setState({cards: this.state.cards.concat({...card, animated: false})});
     }
 
-    const arr = s(cards)
-        .zip(animate, (c, a) => ({card: c, animation: a}))
-        .map(c => <Card className="p-l" card={c.card} animationDelayMs={c.animation ?? undefined} animationDurationMs={animationLen} />)
-        .concat(range(numTotalCards - cards.length).map(_ => <Card className="p-l" />))
-        .toArray();
+    public pop(): CardProps | undefined {
+        const cpy = [...this.state.cards];
+        const last = cpy.pop();
+        this.setState({cards: cpy});
+        return last?.card;
+    }
+
+    public get length() {
+        return this.state.cards.length;
+    }
+
+    public replace(index: number, card: CardProps) {
+        const cpy = [...this.state.cards];
+        cpy[index] = {card: card, animated: false};
+        this.setState({cards: cpy});
+    }
+
+    private setAnimated(index: number, value: boolean = true) {
+        const cpy = [...this.state.cards];
+        cpy[index] = {...cpy[index], animated: value};
+        this.setState({cards: cpy});
+    }
+
+    public render() {
+        const anim = {durationMs: 100, delayMs: 0};
+
+        return <div className={`flex-row align-center justify-space-between ${this.props.className ?? ""}`} style={this.props.style}>
+            {this.state.cards.map((card, i) => {
+                const a = card.animated ? anim : undefined;
+                const key = card.card ? `${card.card.rank}-${card.card.suit}` : i;
+                return <Card card={card.card} className="mx-l" entry={a} flipIn={a} flipOut={a} key={key}
+                             onAnimationComplete={() => this.setAnimated(i, false)}/>
+            })}
+            {range(this.props.maxLen - this.state.cards.length)
+                .map(i => <Card className="mx-l invis" key={i}/>)
+                .toArray()}
+        </div>;
+    }
 }
