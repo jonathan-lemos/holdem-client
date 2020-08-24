@@ -1,7 +1,9 @@
 import React from 'react';
-import Player, {PlayerActionState, PlayerProps} from "./Player";
+import {Villain, PlayerActionState, PlayerProps} from "./Player";
 import {Blinds} from "./Blinds";
 import PlayerHUD from "./PlayerHUD";
+import {CardView} from "./Card";
+import {round} from "./Misc";
 
 
 export interface TableProps {
@@ -16,9 +18,33 @@ export interface TableState {
 }
 
 export class Table extends React.Component<TableProps, TableState> {
+    private cards: React.RefObject<CardView>;
+
     public constructor(props: TableProps) {
         super(props);
-        this.state = {blinds: {ante: 0, bigBlind: 100, smallBlind: 50}, opponents: [{displayName: "ultrachad69", position: 1, positionString: "BB", stack: 10000, state: PlayerActionState.InHandWaiting}], player: {displayName: "pussydestroyer69", position: 0, positionString: "SB", stack: 10000, state: PlayerActionState.InHandActing}, pot: 0};
+
+        this.state = {
+            blinds: {ante: 0, bigBlind: 100, smallBlind: 50},
+            opponents: [{
+                displayName: "ultrachad69",
+                position: 1,
+                positionAbbr: "BB",
+                positionString: "Big Blind",
+                stack: 10000,
+                state: PlayerActionState.InHandWaiting
+            }],
+            player: {
+                displayName: "pussydestroyer69",
+                position: 0,
+                positionAbbr: "SB",
+                positionString: "",
+                stack: 10000,
+                state: PlayerActionState.InHandActing
+            },
+            pot: 0
+        };
+
+        this.cards = React.createRef<CardView>();
     }
 
     public render() {
@@ -43,7 +69,7 @@ export class Table extends React.Component<TableProps, TableState> {
             rightList.push(this.state.opponents[i]);
         }
 
-        const mapPlayer = (player: PlayerProps) => <Player {...player} key={player.displayName} />;
+        const mapPlayer = (player: PlayerProps) => <Villain {...player} bigBlind={this.state.blinds.bigBlind} key={player.displayName}/>;
 
         return (<div className="flex-col align-center">
             {/* players on top */}
@@ -57,8 +83,14 @@ export class Table extends React.Component<TableProps, TableState> {
                     {leftList.map(mapPlayer)}
                 </div>
                 {/* cards + pot */}
-                <div className="flex-grow-1">
+                <div className="flex-grow-1 flex-col align-center justify-center">
+                    <CardView maxLen={5} ref={this.cards} />
+                    <div className="border mt-xl p-l">
+                        <span className="nowrap">{this.state.pot}</span>
+                        <span className="nowrap">{round(this.state.pot / this.state.blinds.bigBlind, 0.1)} BB</span>
 
+                        <span className="nowrap mt-xl">{this.state.blinds.smallBlind} / {this.state.blinds.bigBlind}</span>
+                    </div>
                 </div>
                 {/* players on right */}
                 <div className="flex-col align-center">
@@ -66,7 +98,10 @@ export class Table extends React.Component<TableProps, TableState> {
                 </div>
             </div>
             {/* current player controls */}
-            <PlayerHUD bigBlind={this.state.blinds.bigBlind} onAction={() => {}} pot={this.state.pot} preflop={true} stack={10000} />
+            <PlayerHUD bigBlind={this.state.blinds.bigBlind} onAction={() => {
+            }} pot={this.state.pot} preflop={true} stack={10000} displayName="pussyslayer69" position={0}
+                       positionAbbr="SB" positionString="Small Blind" state={PlayerActionState.InHandActing}
+                       toCall={0}/>
         </div>);
     }
 }

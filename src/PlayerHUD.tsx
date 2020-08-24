@@ -1,8 +1,10 @@
 import {PlayerAction, TableActionType} from "./TableAction";
 import React, {FormEvent, useState} from "react";
-import Transition, {FromType} from "./Transition";
-import { s } from "./Linq";
+import {s} from "./Linq";
 import BaseProps from "./BaseProps";
+import {Hero, PlayerActionState} from "./Player";
+import {round} from "./Misc";
+
 
 export interface RaiseSliderProps {
     increments: number[];
@@ -16,7 +18,8 @@ export function RaiseSlider({increments, onChange, initialIndex = 0, style, clas
         onChange(increments[val]);
     };
 
-    return <input className={`raise-slider ${className ?? ""}`} style={style} type="slider" min={0} max={increments.length - 1} defaultValue={initialIndex}
+    return <input className={`raise-slider ${className ?? ""}`} style={style} type="slider" min={0}
+                  max={increments.length - 1} defaultValue={initialIndex}
                   onInput={handleInput}/>;
 }
 
@@ -24,20 +27,15 @@ export interface PlayerControlsProps {
     bigBlind: number;
     onAction: (action: PlayerAction) => void;
     pot: number;
-    preflop: boolean;
     prevBetSize?: number;
     stack: number;
-    toCall?: number;
+    state: PlayerActionState;
+    toCall: number;
 }
 
-export default function PlayerHUD({bigBlind, onAction, pot, preflop, prevBetSize, stack, toCall = 0}: PlayerControlsProps) {
-    const [isRaising, setIsRaising] = useState(false);
-    const [hasRaised, setHasRaised] = useState(false);
-
-    let raiseValue = 0;
-
+export function PlayerControls({bigBlind, onAction, pot, prevBetSize, stack, state, toCall, style, className}: PlayerControlsProps & BaseProps) {
     const increments = s((function* () {
-        let n = prevBetSize ?? 0;
+        let n = toCall + (prevBetSize ?? bigBlind);
         const incSize = (n: number) => Math.pow(10, Math.max(Math.floor(Math.log10(n)) - 1, 0));
         const round = (n: number) => Math.ceil(n * incSize(n)) / incSize(n);
 
@@ -49,43 +47,81 @@ export default function PlayerHUD({bigBlind, onAction, pot, preflop, prevBetSize
         yield stack;
     })()).toArray();
 
-    return (
-        <div className="w-100 h-100 d-flex flex-column player-controls">
-            
+    let raiseValue = increments[0];
 
-            <Transition expanding={isRaising} from={FromType.Bottom}>
-                <div className={`position-relative w-100 ${hasRaised ? "" : "hidden"}`}>
-                    <div className="position-absolute d-flex flex-column raise-controls">
-                        <RaiseSlider increments={increments} onChange={v => raiseValue = v}/>
-                        <div className="w-100 d-flex">
-                            <div className="w-100 h-100 flex-grow-1 raise-controls-data">
-                                <span>{Math.round(100 * raiseValue / pot)}% Pot</span>
-                                <span>{Math.round(10 * raiseValue / bigBlind) / 10} BB</span>
-                            </div>
-                            <div className="h-100 raise-controls-confirm-button" onClick={() => onAction({
-                                allIn: raiseValue === stack,
-                                amountToCall: raiseValue - (toCall ?? 0),
-                                totalBetSize: raiseValue,
-                                type: TableActionType.Raise
-                            })}>
-                                Confirm
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </Transition>
-            <div className="w-100 d-flex player-controls-button-bar">
-                <div
-                    className={`w-100 flex-grow-1 mx-4 player-controls-button fold-button ${toCall ? "" : "player-controls-button-disabled"}`}
-                    onClick={() => onAction({type: TableActionType.Fold})}>Fold
-                </div>
-                <div className="w-100 flex-grow-1 mx-4 player-controls-button call-button"
-                     onClick={() => onAction({type: toCall ? TableActionType.Call : TableActionType.Check})}>{toCall ? <span>Call<br/>{toCall}</span> : "Check"}</div>
-                <div className="w-100 flex-grow-1 mx-4 call-button" onClick={() => {
-                    setIsRaising(!isRaising);
-                    setHasRaised(true);
-                }}>{toCall ? "Raise" : "Bet"}</div>
+    let [mainClass, setMainClass] = useState("");
+    let [raiseClass, setRaiseClass] = useState("behind invis");
+    let [raising, setRaising] = useState(false);
+
+    const changeState = (state: "raising" | "main") => {
+        switch (state) {
+            case "main":
+                setMainClass("");
+                setRaiseClass("behind invis");
+                setRaising(false);
+                break;
+            case "raising":
+                setMainClass("behind invis");
+                setRaiseClass("");
+                setRaising(true);
+                break;
+        }
+    }
+
+    return <div className="flex-col">
+        <div className={`main-controls ${mainClass}`}>
+            <div className="button-bar">
+                <button className="fold-button" disabled={toCall === 0}
+                        onClick={() => toCall > 0 && onAction({type: TableActionType.Fold})}>Fold
+                </button>
+                <button className="check-call-button"
+                        onClick={() => onAction({type: toCall === 0 ? TableActionType.Check : TableActionType.Call})}>{toCall === 0 ? "Check" : `Call ${toCall}`}</button>
+                <button className="raise-button" onClick={() => changeState("raising")}>Raise</button>
             </div>
+        </div>
+        <div className={`flex-col raise-controls ${raiseClass}`}>
+            <div className="flex-row align-center">
+                <RaiseSlider className="flex-grow-1 pr-l" increments={increments} onChange={v => raiseValue = v}/>
+                <div className="pl-l flex-col">
+                    <span className="nowrap">{raiseValue.toLocaleString()}</span>
+                    <span className="nowrap">{round(100 * raiseValue / pot, 0.1)}% Pot</span>
+                    <span className="nowrap">{round(raiseValue / bigBlind, 0.1)} BB</span>
+                </div>
+            </div>
+            <div className="button-bar">
+                <button className="raise-button" onClick={() => onAction({
+                    type: TableActionType.Raise,
+                    amountToCall: raiseValue - toCall,
+                    totalBetSize: raiseValue,
+                    allIn: raiseValue === stack
+                })}>Raise to {raiseValue.toLocaleString()}</button>
+                <button className="cancel-button" onClick={() => changeState("main")}>Cancel</button>
+            </div>
+        </div>
+    </div>;
+}
+
+export interface PlayerHUDProps {
+    bigBlind: number;
+    displayName: string;
+    onAction: (action: PlayerAction) => void;
+    position: number;
+    positionAbbr: string;
+    positionString: string;
+    pot: number;
+    preflop: boolean;
+    prevBetSize?: number;
+    stack: number;
+    state: PlayerActionState;
+    toCall?: number;
+}
+
+export default function PlayerHUD({bigBlind, displayName, onAction, pot, preflop, position, positionAbbr, positionString, prevBetSize, stack, state, toCall = 0}: PlayerHUDProps) {
+    return (
+        <div className="flex-row">
+            <Hero {...{bigBlind, position, positionAbbr, positionString, displayName, stack, state}} />
+            <PlayerControls className="flex-grow-1" {...{bigBlind, pot, stack, state, toCall, onAction}} />
+
         </div>
     )
 }

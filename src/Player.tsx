@@ -1,5 +1,7 @@
 import React from "react";
 import Card from "./Card";
+import BaseProps from "./BaseProps";
+import {round} from "./Misc";
 
 export enum PlayerActionState {
     InHandActing,
@@ -8,15 +10,19 @@ export enum PlayerActionState {
 }
 
 export interface PlayerProps {
-    displayName: string,
-    position: number,
-    positionAbbr: string,
-    positionString: string,
-    stack: number,
-    state: PlayerActionState
+    displayName: string;
+    position: number;
+    positionAbbr: string;
+    positionString: string;
+    stack: number;
+    state: PlayerActionState;
 }
 
-export function Villain({displayName, position, positionAbbr, positionString, stack, state}: PlayerProps) {
+export interface PlayerTableProps {
+    bigBlind: number;
+}
+
+export function Villain({bigBlind, displayName, position, positionAbbr, positionString, stack, state, className, style}: PlayerProps & PlayerTableProps & BaseProps) {
     let stateClass = "";
     switch (state) {
         case PlayerActionState.Folded:
@@ -31,17 +37,19 @@ export function Villain({displayName, position, positionAbbr, positionString, st
     }
 
     return (
-        <div className={`villain-box p-l ${stateClass}`}>
-            <b className="mb-xl nowrap size-200">{displayName}</b>
-            <div className="flex-row justify-space-between">
-                <span className="flex-grow-1 mr-xl nowrap">{stack.toLocaleString()}</span>
-                <b><abbr className="nowrap" title={positionString}>{positionAbbr}</abbr></b>
+        <div className={`villain-box p-l ${stateClass} ${className ?? ""}`} style={style}>
+            <div className="flex-row justify-space-between m-l">
+                <b className="nowrap size-200 mr-s">{displayName}</b>
+                <div className="flex-grow-1" />
+                <abbr className="ml-s position-label" title={positionString}>{positionAbbr}</abbr>
             </div>
+            <span className="m-l nowrap">{stack.toLocaleString()}</span>
+            <span className="m-l nowrap">{round(stack / bigBlind, 0.1).toLocaleString()} BB</span>
         </div>
     )
 }
 
-export function Hero({displayName, position, positionAbbr, positionString, stack, state}: PlayerProps) {
+export function Hero({bigBlind, displayName, position, positionAbbr, positionString, stack, state, style, className}: PlayerProps & PlayerTableProps & BaseProps) {
     let stateClass = "";
     switch (state) {
         case PlayerActionState.Folded:
@@ -56,17 +64,14 @@ export function Hero({displayName, position, positionAbbr, positionString, stack
     }
 
     return (
-        <div className="flex-row">
-            <div className={`hero-box p-l ${stateClass}`}>
-                <b className="mb-xl nowrap size-200">{displayName}</b>
-                <div className="flex-row justify-space-between">
-                    <span className="flex-grow-1 mr-xl nowrap">{stack.toLocaleString()}</span>
-                    <b><abbr className="nowrap" title={positionString}>{positionAbbr}</abbr></b>
-                </div>
+        <div className={`hero-box p-l ${stateClass} ${className ?? ""}`} style={style}>
+            <div className="flex-row justify-space-between m-l">
+                <b className="nowrap size-200 mr-s">{displayName}</b>
+                <div className="flex-grow-1" />
+                <abbr className="ml-s position-label" title={positionString}>{positionAbbr}</abbr>
             </div>
-            <div>
-                <Card rank={} suit={}
-            </div>
+            <span className="m-l nowrap">{stack.toLocaleString()}</span>
+            <span className="m-l nowrap">{round(stack / bigBlind, 0.1).toLocaleString()} BB</span>
         </div>
     )
 }

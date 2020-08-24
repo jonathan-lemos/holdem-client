@@ -5,42 +5,43 @@ $themes: (
                 main-bg-color: rgb(216, 216, 216),
                 main-text-color: rgb(48, 48, 48),
                 element-bg-color: rgba(200, 200, 200, 0.8),
-                glow-color: deepskyblue
+                glow-color: deepskyblue,
+                label-text-color: rgb(216, 216, 216)
         ),
         dark: (
                 main-bg-color: rgb(48, 48, 48),
                 main-text-color: rgb(216, 216, 216),
                 element-bg-color: rgba(60, 60, 60, 0.8),
-                glow-color: tomato
+                glow-color: tomato,
+                label-text-color: rgb(216, 216, 216)
         ),
 );
 
 @mixin themify($themes: $themes) {
-        @each $theme, $map in $themes {
+  @each $theme, $map in $themes {
 
-                .theme-#{$theme} & {
-                        $theme-map: () !global;
-                        @each $key, $submap in $map {
-                                $value: map-get(map-get($themes, $theme), '#{$key}');
-                                $theme-map: map-merge($theme-map, ($key: $value)) !global;
-                        }
+    .theme-#{$theme} & {
+      $theme-map: () !global;
+      @each $key, $submap in $map {
+        $value: map-get(map-get($themes, $theme), '#{$key}');
+        $theme-map: map-merge($theme-map, ($key: $value)) !global;
+      }
 
-                        @content;
-                        $theme-map: null !global;
-                }
+      @content;
+      $theme-map: null !global;
+    }
 
-        }
+  }
 }
 
 @function themed($key) {
-        @return map-get($theme-map, $key);
+  @return map-get($theme-map, $key);
 }
 
 @function color-hover($color) {
-        @if (color.lightness($color) < 50%) {
-                @return color.scale($color, $lightness: +20%, $alpha: +50%)
-        }
-        @else {
-                @return color.scale($color, $lightness: -20%, $alpha: +50%)
-        }
+  @if (color.lightness($color) < 50%) {
+    @return color.scale($color, $lightness: +20%, $alpha: +50%)
+  } @else {
+    @return color.scale($color, $lightness: -20%, $alpha: +50%)
+  }
 }

@@ -31,3 +31,7 @@ export function deepEqual(a: any, b: any) {
 
     return true;
 }
+
+export function round(n: number, precision: number) {
+    return Math.round(n / precision) * precision;
+}
