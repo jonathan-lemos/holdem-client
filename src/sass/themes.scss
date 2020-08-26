@@ -1,4 +1,3 @@
-@use 'sass:color';
 
 $themes: (
         light: (
@@ -38,10 +37,12 @@ $themes: (
   @return map-get($theme-map, $key);
 }
 
+
 @function color-hover($color) {
-  @if (color.lightness($color) < 50%) {
-    @return color.scale($color, $lightness: +20%, $alpha: +50%)
+
+  @if lightness($color) < 50% {
+    @return scale-color($color, $lightness: +20%, $alpha: +50%)
   } @else {
-    @return color.scale($color, $lightness: -20%, $alpha: +50%)
+    @return scale-color($color, $lightness: -20%, $alpha: +50%)
   }
 }

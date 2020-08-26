@@ -1,9 +1,10 @@
 import React from 'react';
-import {Villain, PlayerActionState, PlayerProps} from "./Player";
+import {PlayerActionState, PlayerProps, Villain} from "./Player";
 import {Blinds} from "./Blinds";
 import PlayerHUD from "./PlayerHUD";
-import {CardView} from "./Card";
+import {CardView, Rank, Suit} from "./Card";
 import {round} from "./Misc";
+import BaseProps from "./BaseProps";
 
 
 export interface TableProps {
@@ -17,7 +18,7 @@ export interface TableState {
     pot: number,
 }
 
-export class Table extends React.Component<TableProps, TableState> {
+export class Table extends React.Component<TableProps & BaseProps, TableState> {
     private cards: React.RefObject<CardView>;
 
     public constructor(props: TableProps) {
@@ -71,34 +72,39 @@ export class Table extends React.Component<TableProps, TableState> {
 
         const mapPlayer = (player: PlayerProps) => <Villain {...player} bigBlind={this.state.blinds.bigBlind} key={player.displayName}/>;
 
-        return (<div className="flex-col align-center">
+        return (<div className={`fluid flex-col align-center p-m ${this.props.className}`} style={this.props.style}>
             {/* players on top */}
-            <div className="flex-row align-center justify-space-between my-2 px-4">
+            <div className="w-100 flex-row align-center justify-space-between">
                 {midList.map(mapPlayer)}
             </div>
             {/* middle section */}
-            <div className="flex-grow-1 flex-row align-center">
+            <div className="fluid flex-grow-1 flex-row align-center m-s">
                 {/* players on left */}
-                <div className="flex-col reverse align-center">
+                <div className="h-100 flex-col reverse align-center">
                     {leftList.map(mapPlayer)}
                 </div>
                 {/* cards + pot */}
-                <div className="flex-grow-1 flex-col align-center justify-center">
-                    <CardView maxLen={5} ref={this.cards} />
-                    <div className="border mt-xl p-l">
-                        <span className="nowrap">{this.state.pot}</span>
+                <div className="fluid flex-grow-1 flex-col align-center justify-center">
+                    <CardView className="fluid bg-green p-s" maxLen={5} ref={this.cards} initialCards={[
+                        {rank: Rank.Ace, suit: Suit.Spade},
+                        {rank: Rank.Five, suit: Suit.Heart},
+                        {rank: Rank.Jack, suit: Suit.Spade},
+                    ]} />
+                    <div className="flex-col text-center border round py-m px-xl mt-m">
+                        <span className="nowrap">Pot: {this.state.pot}</span>
                         <span className="nowrap">{round(this.state.pot / this.state.blinds.bigBlind, 0.1)} BB</span>
 
-                        <span className="nowrap mt-xl">{this.state.blinds.smallBlind} / {this.state.blinds.bigBlind}</span>
+                        <span className="nowrap mt-m">{this.state.blinds.smallBlind} / {this.state.blinds.bigBlind}</span>
                     </div>
                 </div>
                 {/* players on right */}
-                <div className="flex-col align-center">
+                <div className="h-100 flex-col align-center">
                     {rightList.map(mapPlayer)}
                 </div>
             </div>
             {/* current player controls */}
-            <PlayerHUD bigBlind={this.state.blinds.bigBlind} onAction={() => {
+            <PlayerHUD className="mt-s"
+                bigBlind={this.state.blinds.bigBlind} onAction={() => {
             }} pot={this.state.pot} preflop={true} stack={10000} displayName="pussyslayer69" position={0}
                        positionAbbr="SB" positionString="Small Blind" state={PlayerActionState.InHandActing}
                        toCall={0}/>

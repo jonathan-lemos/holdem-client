@@ -1,5 +1,4 @@
 import React from "react";
-import Card from "./Card";
 import BaseProps from "./BaseProps";
 import {round} from "./Misc";
 
@@ -29,7 +28,7 @@ export function Villain({bigBlind, displayName, position, positionAbbr, position
             stateClass = "folded";
             break;
         case PlayerActionState.InHandActing:
-            stateClass = "acting";
+            stateClass = "acting border-glow";
             break;
         case PlayerActionState.InHandWaiting:
             stateClass = "waiting";
@@ -37,14 +36,12 @@ export function Villain({bigBlind, displayName, position, positionAbbr, position
     }
 
     return (
-        <div className={`villain-box p-l ${stateClass} ${className ?? ""}`} style={style}>
-            <div className="flex-row justify-space-between m-l">
-                <b className="nowrap size-200 mr-s">{displayName}</b>
-                <div className="flex-grow-1" />
-                <abbr className="ml-s position-label" title={positionString}>{positionAbbr}</abbr>
+        <div className={`villain-box ${stateClass} ${className ?? ""}`} style={style}>
+            <div className="flex-row justify-space-between align-center m-s">
+                <b className="nowrap size-125 mr-s flex-grow-1 text-center">{displayName}</b>
+                <abbr className="ml-s position-label" title={positionString}><b>{positionAbbr}</b></abbr>
             </div>
-            <span className="m-l nowrap">{stack.toLocaleString()}</span>
-            <span className="m-l nowrap">{round(stack / bigBlind, 0.1).toLocaleString()} BB</span>
+            <span className="m-s nowrap">{stack.toLocaleString()} / {round(stack / bigBlind, 0.1).toLocaleString()} BB</span>
         </div>
     )
 }
@@ -56,7 +53,7 @@ export function Hero({bigBlind, displayName, position, positionAbbr, positionStr
             stateClass = "folded";
             break;
         case PlayerActionState.InHandActing:
-            stateClass = "acting";
+            stateClass = "acting border-glow";
             break;
         case PlayerActionState.InHandWaiting:
             stateClass = "waiting";
@@ -64,14 +61,12 @@ export function Hero({bigBlind, displayName, position, positionAbbr, positionStr
     }
 
     return (
-        <div className={`hero-box p-l ${stateClass} ${className ?? ""}`} style={style}>
-            <div className="flex-row justify-space-between m-l">
-                <b className="nowrap size-200 mr-s">{displayName}</b>
-                <div className="flex-grow-1" />
-                <abbr className="ml-s position-label" title={positionString}>{positionAbbr}</abbr>
+        <div className={`hero-box ${stateClass} ${className ?? ""}`} style={style}>
+            <div className="flex-row justify-space-between align-center m-s">
+                <b className="nowrap size-150 mr-s flex-grow-1 text-center">{displayName}</b>
+                <abbr className="ml-s position-label size-125" title={positionString}><b>{positionAbbr}</b></abbr>
             </div>
-            <span className="m-l nowrap">{stack.toLocaleString()}</span>
-            <span className="m-l nowrap">{round(stack / bigBlind, 0.1).toLocaleString()} BB</span>
+            <span className="m-s nowrap size-125">{stack.toLocaleString()} / {round(stack / bigBlind, 0.1).toLocaleString()} BB</span>
         </div>
     )
 }

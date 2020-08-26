@@ -1,5 +1,5 @@
 import BaseProps from "./BaseProps";
-import React, {CSSProperties, useState} from "react";
+import React, {useState} from "react";
 
 export interface SelectedAnimationProps {
     delayMs?: number;

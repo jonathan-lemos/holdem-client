@@ -1,13 +1,16 @@
 @use 'themes' as *
-@use 'text'
+@import 'sizing'
+@import 'spacing'
+@import 'text'
 
 =colored-label($bg-color)
+  @extend .p-s
   background-color: $bg-color
-  border-radius: 0.15em
-  padding: 0.25em
+  border-radius: 0.25em
   @include themify($themes)
     color: themed("label-text-color")
 
 .position-label
   @extend .nowrap
+  @extend .no-decorations
   +colored-label(red)

@@ -22,7 +22,7 @@
   to
     transform: scale(0, 0)
 
-$animation-time: 0.3s
+$animation-time: 0.5s
 $animation-type: ease
 
 .expand-from-bottom
@@ -39,6 +39,36 @@ $animation-type: ease
     transform: scaleX(0)
   to
     transform: scaleX(1)
+
+@keyframes backside
+  from
+    transform: scale(0, 0)
+  50%
+    transform: scale(1, 1)
+  66%
+    transform: scale(1, 1)
+  100%
+    transform: scale(0, 1)
+
+@keyframes frontside
+  from
+    opacity: 0
+    transform: scaleX(0)
+  49%
+    opacity: 0
+  50%
+    transform: scaleX(0)
+    opacity: 1
+  100%
+    transform: scaleX(1)
+
+.backside
+  position: relative
+  animation: backside $animation-time ease-in forwards
+
+.frontside
+  position: absolute
+  animation: frontside ($animation-time * 2) ease-out forwards
 
 .flip-out
   animation: flip-out $animation-time $animation-type forwards

@@ -1,13 +1,12 @@
 @use 'themes' as *
-@use 'sass:color'
-@use 'container'
-@use 'spacing'
-@use 'border'
+@import 'container'
+@import 'spacing'
+@import 'border'
 
 =box-base
   @extend .flex-col
-  @extend .p-l
-  @extend .align-items-center
+  @extend .p-s
+  @extend .align-center
 
   border-radius: 0.25em
   transition: 0.3s
@@ -27,13 +26,13 @@
 
 .villain-box
   +box-base
-  height: 12em
-  width: 12em
 
   &.acting
     @extend .border-glow
 
 .hero-box
   +box-base
-  height: 20em
-  width: 20em
+
+  &.acting
+    @extend .border-glow
+

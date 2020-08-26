@@ -1,9 +1,9 @@
-@each $i in (5, 10, 20, 25, 30, 33, 40, 50, 60, 66, 70, 75, 80, 90, 95, 100)
+@each $i in (0, 5, 10, 20, 25, 30, 33, 40, 50, 60, 66, 70, 75, 80, 90, 95, 100)
   .h-#{$i}
-    height: $i%
+    height: percentage($i / 100)
 
   .w-#{$i}
-    width: $i%
+    width: percentage($i / 100)
 
   .h-#{$i}-vh
     height: $i vh
@@ -17,6 +17,10 @@
 
   .h-#{$i}-em
     width: $i em
+
+.fluid
+  width: 100%
+  height: 100%
 
 .wrap
   width: max-content

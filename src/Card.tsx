@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {range, s} from "./Linq";
 import BaseProps from "./BaseProps";
 import {animate, animateStyleDefaults, SelectedAnimationProps} from "./Animated";
@@ -60,31 +60,49 @@ export interface CardComponentProps {
 }
 
 export default function Card({card, className, style, entry, flipOut, flipIn, onAnimationComplete}: CardComponentProps & BaseProps) {
-    entry = entry ?? {delayMs: 0, durationMs: 100};
+    /*
+       entry = entry ?? {delayMs: 0, durationMs: 100};
 
-    const [frontStyle, setFrontStyle] = useState({...animateStyleDefaults, opacity: 0});
-    const [backStyle, setBackStyle] = useState({...animateStyleDefaults, opacity: 1});
+       const [frontStyle, setFrontStyle] = useState({...animateStyleDefaults, opacity: 0});
+       const [backStyle, setBackStyle] = useState({...animateStyleDefaults, opacity: 1});
 
-    animate(backStyle, setBackStyle, [
-        {...(entry ? {...entry, type: "expand-in"} : {type: "none"})},
-        {...(flipOut ? {...flipOut, type: "flip-out"} : {type: "none"})},
-    ]).then(async () => {
-        if (card != null) {
-            await animate(frontStyle, setFrontStyle, {...(flipIn ? {...flipIn, type: "flip-in"} : {type: "none"})});
-        }
-        onAnimationComplete && onAnimationComplete();
-    });
+       useEffect(() => {
+           animate(backStyle, setBackStyle, [
+               {...(entry ? {...entry, type: "expand-in"} : {type: "none"})},
+               {...(flipOut ? {...flipOut, type: "flip-out"} : {type: "none"})},
+           ]).then(async () => {
+               if (card != null) {
+                   await animate(frontStyle, setFrontStyle, {...(flipIn ? {...flipIn, type: "flip-in"} : {type: "none"})});
+               }
+               onAnimationComplete && onAnimationComplete();
+           })
+       }, []);
+     */
 
     if (card == null) {
-        return <div className={`${className ?? ""} position-relative`} style={style}>
-            <div className="border bg-blue position-relative backside" style={backStyle}/>
+        return <div className={`flex-row ${className ?? ""}`} style={style}>
+            <div className="border bg-blue position-relative backside">
+                <b><span className="size-400 invis">{Rank.Jack}{Suit.Spade}</span></b>
+            </div>
         </div>;
     }
 
-    return <div className={className} style={style}>
-        <div className="border bg-blue position-relative backside" style={backStyle}/>
-        <div className="border bg-white position-absolute frontside" style={frontStyle}>
-            <b><span className="size-400">{card.rank}-{card.suit}</span></b>
+    let color: string;
+    switch (card.suit) {
+        case Suit.Diamond:
+        case Suit.Heart:
+            color = "red";
+            break;
+        default:
+            color = "black";
+    }
+
+    return <div className={`flex-row ${className ?? ""}`} style={style}>
+        <div className="border bg-blue backside p-s">
+            <b><span className="size-400 invis">{Rank.Jack}{Suit.Spade}</span></b>
+        </div>
+        <div className="border bg-white frontside p-s no-select">
+            <b><span className={`size-400 ${color}`}>{card.rank}{card.suit}</span></b>
         </div>
     </div>;
 }
@@ -111,7 +129,7 @@ export class CardView extends React.Component<CardViewProps & BaseProps, CardVie
         if (props.maxLen < 0) {
             throw new Error(`maxLen cannot be < 0 (was ${props.maxLen})`);
         }
-        if (props.maxLen > c.length) {
+        if (c.length > props.maxLen) {
             throw new Error(`Number of cards given (${c.length}) exceeds the maxLen (${props.maxLen}).`);
         }
 

@@ -1,8 +1,26 @@
 .nowrap
-  overflow: hidden
   text-overflow: ellipsis
   white-space: nowrap
 
-@each $mult in (25, 50, 75, 100, 150, 200, 250, 300, 400, 600)
+@each $mult in (25, 50, 75, 100, 125, 150, 175, 200, 250, 300, 400, 600)
   .size-#{$mult}
-    font-size: $mult%
+    font-size: percentage($mult / 100)
+
+.text-center
+  text-align: center
+
+  & *
+    text-align: center
+
+.no-decorations
+  text-decoration: none
+
+.red
+  color: darkred
+
+.black
+  color: black
+
+.no-select
+  pointer-events: none
+  user-select: none
